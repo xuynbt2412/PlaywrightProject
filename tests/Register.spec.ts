@@ -1,4 +1,3 @@
-import { HomePage } from '../pages/home_page';
 import { test, expect } from '../fixture/test.fixture';
 
 const nameSignUp = 'userTest111';
@@ -19,7 +18,7 @@ const city = 'City';
 const zipcode = '12345';
 const mobileNumber = '1234567890';
 
-test('Register User', async ({ page, homePage }) => {
+test('Register User', async ({ page, homePage, registerPage }) => {
     //3. Verify that home page is visible successfully
     await test.step('Verify home page', async () => {
         await expect(page).toHaveTitle('Automation Exercise');
@@ -37,12 +36,12 @@ test('Register User', async ({ page, homePage }) => {
 
     //6. Enter name and email address
     await test.step('Enter name and email address', async () => {
-        await homePage.fillSignupForm(nameSignUp, emailSignUp);
+        await registerPage.fillSignupForm(nameSignUp, emailSignUp);
     })
 
     //7. Click 'Signup' button
     await test.step('Click Signup button', async () => {
-        await homePage.clickSignupButton();
+        await registerPage.clickSignupButton();
     })
 
     // 8. Verify that 'ENTER ACCOUNT INFORMATION' is visible
@@ -52,27 +51,27 @@ test('Register User', async ({ page, homePage }) => {
 
     // 9. Fill details: Title, Name, Email, Password, Date of birth
     await test.step('Fill details', async () => {
-        await homePage.fillDetailInformation('Mrs', nameSignUp, emailSignUp, password, day, month, year);
+        await registerPage.fillDetailInformation('Mrs', nameSignUp, emailSignUp, password, day, month, year);
     })
 
     // 10. Select checkbox 'Sign up for our newsletter!'
     await test.step('Select checkbox newsletter', async () => {
-        await homePage.selectNewsletter();
+        await registerPage.selectNewsletter();
     })
 
     // 11. Select checkbox 'Receive special offers from our partners!'
     await test.step('Select checkbox special offers', async () => {
-        await homePage.selectSpecialOffers();
+        await registerPage.selectSpecialOffers();
     })
 
     // 12. Fill details: First name, Last name, Company, Address, Address2, Country, State, City, Zipcode, Mobile Number
     await test.step('Fill address information', async () => {
-        await homePage.fillAddressInformation(firstName, lastName, company, address1, address2, country, state, city, zipcode, mobileNumber);
+        await registerPage.fillAddressInformation(firstName, lastName, company, address1, address2, country, state, city, zipcode, mobileNumber);
     })
 
     // 13. Click 'Create Account button'
     await test.step('Click Create Account button', async () => {
-        await homePage.clickCreateAccountButton();
+        await registerPage.clickCreateAccountButton();
     })
 
     // 14. Verify that 'ACCOUNT CREATED!' is visible
@@ -82,7 +81,7 @@ test('Register User', async ({ page, homePage }) => {
 
     // 15. Click 'Continue' button
     await test.step('Click Continue button', async () => {
-        await homePage.clickContinueButton();
+        await registerPage.clickContinueButton();
     })
 
     // 16. Verify that 'Logged in as username' is visible
@@ -92,13 +91,13 @@ test('Register User', async ({ page, homePage }) => {
 
     // 17. Click 'Delete Account' button
     await test.step('Click Delete Account button', async () => {
-        await homePage.clickDeleteAccountButton();
+        await registerPage.clickDeleteAccountButton();
     })
 
     // 18. Verify that 'ACCOUNT DELETED!' is visible and click 'Continue' button
     await test.step('Verify account deleted', async () => {
         await expect(page.getByText('ACCOUNT DELETED!')).toBeVisible();
-        await homePage.clickContinueButton();
+        await registerPage.clickContinueButton();
     })
 
 })
