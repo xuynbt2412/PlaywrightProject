@@ -1,15 +1,35 @@
 {
-  "name": "playwrightproject",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {},
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "@playwright/test": "^1.64.1",
-    "@types/node": "^26.6.6"
-  }
+    "name": "playwrightproject",
+    "version": "1.0.0",
+    "description": "Isolated Playwright tests for Automation Exercise",
+    "scripts": {
+        "test": "playwright test",
+        "test:e2e": "playwright test --grep @e2e",
+        "test:support": "playwright test tests/support",
+        "test:ui": "playwright test --ui",
+        "test:headed": "playwright test --headed",
+        "test:debug": "playwright test --debug",
+        "report": "playwright show-report",
+        "typecheck": "tsc --noEmit",
+        "lint": "eslint . --max-warnings=0",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "check": "npm run typecheck && npm run lint && npm run format:check"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "devDependencies": {
+        "@playwright/test": "1.64.1",
+        "@types/node": "24.19.2",
+        "eslint": "10.14.0",
+        "eslint-plugin-playwright": "2.12.2",
+        "prettier": "3.9.10",
+        "typescript": "6.0.3",
+        "typescript-eslint": "8.72.1"
+    },
+    "engines": {
+        "node": ">=24"
+    }
 }

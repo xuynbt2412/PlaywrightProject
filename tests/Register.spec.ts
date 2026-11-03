@@ -1,105 +1,72 @@
-import { test, expect } from '../fixture/test.fixture';
+import { test, expect } from '../fixture/signup.fixture';
 
-const nameSignUp = 'userTest111';
-const emailSignUp = 'userTest111@gmail.com';
-const password = '123456';
-const day = '1';
-const month = 'January';
-const year = '1990';
+// Exercise both radio options to prevent the previous always-select-Mrs regression.
+for (const title of ['Mr', 'Mrs'] as const) {
+    test(
+        `Register User (${title})`,
+        { tag: '@e2e' },
+        async ({ page, homePage, header, registerPage, userData }) => {
+            const user = { ...userData, title };
 
-const firstName = 'User';
-const lastName = 'Test';
-const company = 'Company';
-const address1 = 'Address1';
-const address2 = 'Address2';
-const country = 'Canada';
-const state = 'State';
-const city = 'City';
-const zipcode = '12345';
-const mobileNumber = '1234567890';
+            await test.step('Open signup form', async () => {
+                await homePage.navigateToHomePage();
+                await expect(page).toHaveTitle('Automation Exercise');
+                await header.clickSignupLogin();
+                await expect(registerPage.signupHeading).toBeVisible();
+            });
 
-test('Register User', async ({ page, homePage, registerPage }) => {
-    //3. Verify that home page is visible successfully
-    await test.step('Verify home page', async () => {
-        await expect(page).toHaveTitle('Automation Exercise');
-    })
+            await test.step('Submit a new name and email', async () => {
+                await registerPage.fillSignupForm(user.name, user.email);
+                await registerPage.clickSignupButton();
+                await expect(registerPage.accountInformationHeading).toBeVisible();
+                await expect(registerPage.emailInput).toHaveValue(user.email);
+                await expect(registerPage.emailInput).toBeDisabled();
+            });
 
-    //4. Click on 'Signup / Login' button
-    await test.step('Click on Signup / Login button', async () => {
-        await homePage.clickSignupLogin();
-    })
+            await test.step('Fill account details and preferences', async () => {
+                await registerPage.fillDetailInformation(user);
+                await expect(registerPage.titleOption(title)).toBeChecked();
+                await registerPage.selectNewsletter();
+                await registerPage.selectSpecialOffers();
+            });
 
-    //5. Verify 'New User Signup!' is visible
-    await test.step('Verify New User Signup! is visible', async () => {
-        await expect(page.getByText('New User Signup!')).toBeVisible();
-    })
+            await test.step('Fill address and create account', async () => {
+                await registerPage.fillAddressInformation(user.address);
+                await registerPage.clickCreateAccountButton();
+                await expect(registerPage.accountCreatedHeading).toBeVisible();
+            });
 
-    //6. Enter name and email address
-    await test.step('Enter name and email address', async () => {
-        await registerPage.fillSignupForm(nameSignUp, emailSignUp);
-    })
+            await test.step('Continue and verify the registered user', async () => {
+                await registerPage.clickContinueButton();
+                await expect(header.loggedInAs(user.name)).toBeVisible();
+            });
 
-    //7. Click 'Signup' button
-    await test.step('Click Signup button', async () => {
-        await registerPage.clickSignupButton();
-    })
+            await test.step('Delete account and verify confirmation', async () => {
+                await header.clickDeleteAccount();
+                await expect(registerPage.accountDeletedHeading).toBeVisible();
+                await registerPage.clickContinueButton();
+                await expect(header.signupLoginLink).toBeVisible();
+            });
+        },
+    );
+}
 
-    // 8. Verify that 'ENTER ACCOUNT INFORMATION' is visible
-    await test.step('Verify account information', async () => {
-        await expect(page.getByText('ENTER ACCOUNT INFORMATION')).toBeVisible();
-    })
+test(
+    'Register User with existing email',
+    { tag: '@e2e' },
+    async ({ page, homePage, header, registerPage, registeredUser }) => {
+        await test.step('Open signup form', async () => {
+            await homePage.navigateToHomePage();
+            await expect(page).toHaveTitle('Automation Exercise');
+            await header.clickSignupLogin();
+            await expect(registerPage.signupHeading).toBeVisible();
+        });
 
-    // 9. Fill details: Title, Name, Email, Password, Date of birth
-    await test.step('Fill details', async () => {
-        await registerPage.fillDetailInformation('Mrs', nameSignUp, emailSignUp, password, day, month, year);
-    })
-
-    // 10. Select checkbox 'Sign up for our newsletter!'
-    await test.step('Select checkbox newsletter', async () => {
-        await registerPage.selectNewsletter();
-    })
-
-    // 11. Select checkbox 'Receive special offers from our partners!'
-    await test.step('Select checkbox special offers', async () => {
-        await registerPage.selectSpecialOffers();
-    })
-
-    // 12. Fill details: First name, Last name, Company, Address, Address2, Country, State, City, Zipcode, Mobile Number
-    await test.step('Fill address information', async () => {
-        await registerPage.fillAddressInformation(firstName, lastName, company, address1, address2, country, state, city, zipcode, mobileNumber);
-    })
-
-    // 13. Click 'Create Account button'
-    await test.step('Click Create Account button', async () => {
-        await registerPage.clickCreateAccountButton();
-    })
-
-    // 14. Verify that 'ACCOUNT CREATED!' is visible
-    await test.step('Verify account created', async () => {
-        await expect(page.getByText('ACCOUNT CREATED!')).toBeVisible();
-    })
-
-    // 15. Click 'Continue' button
-    await test.step('Click Continue button', async () => {
-        await registerPage.clickContinueButton();
-    })
-
-    // 16. Verify that 'Logged in as username' is visible
-    await test.step('Verify logged in as username', async () => {
-        await expect(page.getByText(`Logged in as ${nameSignUp}`)).toBeVisible();
-    })
-
-    // 17. Click 'Delete Account' button
-    await test.step('Click Delete Account button', async () => {
-        await registerPage.clickDeleteAccountButton();
-    })
-
-    // 18. Verify that 'ACCOUNT DELETED!' is visible and click 'Continue' button
-    await test.step('Verify account deleted', async () => {
-        await expect(page.getByText('ACCOUNT DELETED!')).toBeVisible();
-        await registerPage.clickContinueButton();
-    })
-
-})
-
-
+        await test.step('Reject the email already registered by the fixture', async () => {
+            await registerPage.fillSignupForm(registeredUser.name, registeredUser.email);
+            await registerPage.clickSignupButton();
+            await expect(registerPage.existingEmailError).toBeVisible();
+            await expect(registerPage.accountInformationHeading).toBeHidden();
+        });
+    },
+);

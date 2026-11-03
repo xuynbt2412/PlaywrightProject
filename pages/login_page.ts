@@ -1,15 +1,20 @@
-import { type Page } from '@playwright/test';
+import { type Locator, type Page } from '@playwright/test';
 
 export class LoginPage {
-    constructor(private page: Page) { }
+    readonly heading: Locator;
+    readonly errorMessage: Locator;
 
-    async fillLoginForm(email: string, password: string) {
-        // Trang có cả form đăng ký và đăng nhập; data-qa xác định đúng ô login.
-        await this.page.locator('[data-qa="login-email"]').fill(email);
-        await this.page.locator('[data-qa="login-password"]').fill(password);
+    constructor(private readonly page: Page) {
+        this.heading = page.getByRole('heading', { name: 'Login to your account' });
+        this.errorMessage = page.getByText('Your email or password is incorrect!', { exact: true });
     }
 
-    async clickLoginButton() {
+    async fillLoginForm(email: string, password: string): Promise<void> {
+        await this.page.getByTestId('login-email').fill(email);
+        await this.page.getByTestId('login-password').fill(password);
+    }
+
+    async clickLoginButton(): Promise<void> {
         await this.page.getByRole('button', { name: 'Login', exact: true }).click();
     }
 }
