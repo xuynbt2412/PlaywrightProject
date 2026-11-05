@@ -4,6 +4,7 @@
     "description": "Isolated Playwright tests for Automation Exercise",
     "scripts": {
         "test": "playwright test",
+        "test:api": "playwright test tests/api",
         "test:e2e": "playwright test --grep @e2e",
         "test:support": "playwright test tests/support",
         "test:ui": "playwright test --ui",

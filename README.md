@@ -1,8 +1,9 @@
 # PlaywrightProject
 
-Bộ test Playwright + TypeScript cho Automation Exercise. Các test dùng tài khoản riêng,
-chạy độc lập và tự dọn dữ liệu. Giữ các đường dẫn `tests/Login.spec.ts`,
+Bộ test Playwright + TypeScript cho Automation Exercise. Các test cần tài khoản dùng
+tài khoản riêng, chạy độc lập và tự dọn dữ liệu. Giữ các đường dẫn `tests/Login.spec.ts`,
 `tests/Logout.spec.ts`, `tests/Register.spec.ts` để tiếp tục chạy từ VS Code.
+Test Contact Us nằm trong `tests/Contact.spec.ts` và không yêu cầu tài khoản.
 
 ## Cài đặt
 
@@ -33,6 +34,7 @@ Chạy một file hoặc một testcase:
 npm test -- tests/Login.spec.ts
 npm test -- tests/Logout.spec.ts --headed
 npm test -- tests/Register.spec.ts --grep "existing email"
+npm test -- tests/Contact.spec.ts --headed
 ```
 
 Trong VS Code, dùng extension **Playwright Test for VSCode** của Microsoft.
@@ -62,6 +64,7 @@ tests/
   Login.spec.ts
   Logout.spec.ts
   Register.spec.ts
+  Contact.spec.ts
   support/account-api.spec.ts
 fixture/
   test.fixture.ts          # Tạo Page Object và Header, không tự điều hướng
@@ -71,20 +74,22 @@ pages/
   home_page.ts
   login_page.ts
   register_page.ts
-  components/header.ts    # Signup/Login, Logout, Delete Account dùng chung
+  contact_page.ts
+  components/header.ts    # Các link điều hướng dùng chung, bao gồm Contact Us
 data/user.factory.ts      # Kiểu dữ liệu và tài khoản ngẫu nhiên cho từng test
+data/files/contact-message.txt  # File upload mẫu cho Contact Us
 services/account.api.ts   # Tạo/xóa tài khoản và kiểm tra phản hồi API
 .github/workflows/playwright.yml
 ```
 
 ## Chọn fixture đúng với mục đích test
 
-| Fixture                                           | Trạng thái khi thân test bắt đầu                          | Test sử dụng                     |
-| ------------------------------------------------- | --------------------------------------------------------- | -------------------------------- |
-| `homePage`, `loginPage`, `registerPage`, `header` | Chỉ có Page Object; chưa mở URL                           | Các thao tác UI                  |
-| `userData`                                        | Dữ liệu duy nhất, **chưa đăng ký**                        | Register thành công              |
-| `registeredUser`                                  | Tài khoản đã được tạo qua API; browser **chưa đăng nhập** | Login đúng, Register email trùng |
-| `loggedInPage`                                    | Tài khoản riêng đã được đăng nhập qua UI                  | Logout                           |
+| Fixture                                                          | Trạng thái khi thân test bắt đầu                          | Test sử dụng                     |
+| ---------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------- |
+| `homePage`, `loginPage`, `registerPage`, `contactPage`, `header` | Chỉ có Page Object; chưa mở URL                           | Các thao tác UI                  |
+| `userData`                                                       | Dữ liệu duy nhất, **chưa đăng ký**                        | Register thành công              |
+| `registeredUser`                                                 | Tài khoản đã được tạo qua API; browser **chưa đăng nhập** | Login đúng, Register email trùng |
+| `loggedInPage`                                                   | Tài khoản riêng đã được đăng nhập qua UI                  | Logout                           |
 
 Chuỗi dependency:
 
@@ -100,12 +105,36 @@ chủ rồi điền `registeredUser.email` và `registeredUser.password`. Test �
 không yêu cầu tài khoản đã đăng ký, nên không tạo/xóa tài khoản qua API.
 
 **Thay đổi so với phiên bản trước:** `registeredUser` tạo tài khoản bằng API, không
-điền form Signup và Logout qua UI. `homePage` không còn tự mở URL trong constructor
-fixture; test gọi `homePage.navigateToHomePage()` rõ ràng.
+điền form Signup và Logout qua UI. `homePage` không còn tự mở URL trong phần setup
+của fixture; test gọi `homePage.navigateToHomePage()` rõ ràng.
 
 Register thành công vẫn kiểm tra toàn bộ UI; hai biến thể `Mr` và `Mrs` kiểm tra
 đúng radio được chọn. Email chỉ đọc được kiểm tra bằng assertion, không truyền
 vào hàm điền account details. Các field địa chỉ được truyền bằng object có kiểu.
+
+## Test Contact Us
+
+`tests/Contact.spec.ts` import fixture cơ bản từ `fixture/test.fixture.ts`, dùng
+`homePage`, `header`, `contactPage` và `page`. Không dùng `registeredUser` hay
+`loggedInPage`, nên không gọi API tạo/xóa tài khoản.
+
+Luồng: mở trang chủ -> bấm Contact Us -> kiểm tra Get In Touch -> điền tên, email,
+subject, message -> chọn file mẫu -> bấm Submit -> chấp nhận hộp thoại confirm ->
+kiểm tra thông báo thành công -> bấm Home và kiểm tra URL/trang chủ.
+
+File mẫu được lưu trong `data/files/contact-message.txt`; đường dẫn được resolve
+từ vị trí file test, không phụ thuộc thư mục Downloads hay đường dẫn cá nhân.
+Email liên hệ được sinh riêng cho từng lần chạy. `page.waitForEvent('dialog')`
+được đăng ký trước thao tác Submit và `dialog.accept()` xử lý bước OK; test còn
+kiểm tra loại hộp thoại và nội dung “Press OK to proceed!”.
+
+Sau khi mở Contact Us, test chờ `domcontentloaded` để các script cuối trang gắn
+handler Submit. Chỉ thấy form hiển thị chưa bảo đảm handler đã sẵn sàng; bấm quá
+sớm có thể gây submit thông thường và tải lại trang mà không mở hộp thoại.
+
+Form mẫu hiện xử lý thông báo thành công bằng JavaScript ngay trên trang. Test
+kiểm tra file đã được chọn và hành vi giao diện; không khẳng định backend đã lưu
+liên hệ hoặc nội dung file. Contact Us không có API cleanup liên hệ trong suite.
 
 ## Dữ liệu và cleanup
 

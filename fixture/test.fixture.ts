@@ -3,12 +3,14 @@ import { HomePage } from '../pages/home_page';
 import { RegisterPage } from '../pages/register_page';
 import { LoginPage } from '../pages/login_page';
 import { Header } from '../pages/components/header';
+import { ContactPage } from '../pages/contact_page';
 
 type PageFixtures = {
     homePage: HomePage;
     registerPage: RegisterPage;
     loginPage: LoginPage;
     header: Header;
+    contactPage: ContactPage;
 };
 
 // Page objects do not navigate. Tests/state fixtures explicitly choose where to start.
@@ -24,6 +26,9 @@ export const test = base.extend<PageFixtures>({
     },
     header: async ({ page }, use) => {
         await use(new Header(page.getByRole('banner')));
+    },
+    contactPage: async ({ page }, use) => {
+        await use(new ContactPage(page));
     },
 });
 

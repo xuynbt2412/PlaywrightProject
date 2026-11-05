@@ -5,12 +5,14 @@ export class Header {
     readonly logoutLink: Locator;
     readonly deleteAccountLink: Locator;
     readonly loggedInLabel: Locator;
+    readonly contactUsLink: Locator;
 
     constructor(private readonly root: Locator) {
         this.signupLoginLink = root.getByRole('link', { name: 'Signup / Login' });
         this.logoutLink = root.getByRole('link', { name: 'Logout' });
         this.deleteAccountLink = root.getByRole('link', { name: 'Delete Account' });
         this.loggedInLabel = root.getByText('Logged in as');
+        this.contactUsLink = root.getByRole('link', { name: 'Contact us' });
     }
 
     loggedInAs(name: string): Locator {
@@ -24,5 +26,9 @@ export class Header {
     }
     async clickDeleteAccount(): Promise<void> {
         await this.deleteAccountLink.click();
+    }
+
+    async clickContactUs(): Promise<void> {
+        await this.contactUsLink.click();
     }
 }
